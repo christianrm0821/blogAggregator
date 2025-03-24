@@ -6,8 +6,8 @@ import (
 	"os"
 )
 
-func (c *Config) SetUser(username string) error {
-	*((*c).CurrentUserName) = username
+func (c *Config) SetUser(username *string) error {
+	(*c).CurrentUserName = username
 
 	data, err := json.MarshalIndent(*c, "", " ")
 	if err != nil {

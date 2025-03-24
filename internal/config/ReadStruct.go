@@ -25,6 +25,5 @@ func Read() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &ans, nil
 }
