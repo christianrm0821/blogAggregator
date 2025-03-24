@@ -8,11 +8,7 @@ import (
 
 func Read() (*Config, error) {
 	var ans Config
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return nil, err
-	}
-	path := home + "/.gatorconfig.json"
+	path := BaseURL()
 
 	res, err := os.Open(path)
 	if err != nil {
