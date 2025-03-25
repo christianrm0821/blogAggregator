@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// Reads the data from the path "baseurl" and return a config pointer to that data or an error
 func Read() (*Config, error) {
 	var ans Config
 	path := BaseURL()

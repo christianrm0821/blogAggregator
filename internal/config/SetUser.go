@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// converts data with new user to json and writes it onto the file in path "BaseURL()"
 func (c *Config) SetUser(username *string) error {
 	(*c).CurrentUserName = username
 

@@ -12,6 +12,9 @@ type state struct {
 func main() {
 	var ans *config.Config
 	ans, err := config.Read()
+	fmt.Printf("DBurl: %v\n", *((*ans).DbURL))
+	fmt.Printf("username: %v\n", *((*ans).CurrentUserName))
+
 	if err != nil {
 		return
 	}
