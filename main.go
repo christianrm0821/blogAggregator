@@ -73,13 +73,6 @@ func main() {
 		fmt.Println("error with running myCommand")
 		os.Exit(1)
 	}
-	/*
-		user := "Christian"
-		err = ans.SetUser(&user)
-		if err != nil {
-			return
-		}
-	*/
 	ans, _ = config.Read()
 	fmt.Printf("DBurl: %v\n", *((*ans).DbURL))
 	fmt.Printf("username: %v\n", *((*ans).CurrentUserName))
