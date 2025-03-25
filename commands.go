@@ -1,6 +1,6 @@
 package main
 
-type Command struct {
+type command struct {
 	name *string
 	args []string
 }
