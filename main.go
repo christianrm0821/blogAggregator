@@ -5,6 +5,10 @@ import (
 	"workspace/github.com/christianrm0821/blogAggregator/internal/config"
 )
 
+type state struct {
+	config *config.Config
+}
+
 func main() {
 	var ans *config.Config
 	ans, err := config.Read()
