@@ -8,14 +8,17 @@ import (
 
 // converts data with new user to json and writes it onto the file in path "BaseURL()"
 func (c *Config) SetUser(username *string) error {
-	(*c).CurrentUserName = username
+	c.CurrentUserName = username
 
 	data, err := json.MarshalIndent(*c, "", " ")
 	if err != nil {
 		return err
 	}
 
-	JsonFile := BaseURL()
+	JsonFile, err := BaseURL()
+	if err != nil {
+		return err
+	}
 	w, err := os.OpenFile(JsonFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		fmt.Println("error making the writer")

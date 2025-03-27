@@ -9,7 +9,10 @@ import (
 // Reads the data from the path "baseurl" and return a config pointer to that data or an error
 func Read() (*Config, error) {
 	var ans Config
-	path := BaseURL()
+	path, err := BaseURL()
+	if err != nil {
+		return nil, err
+	}
 
 	res, err := os.Open(path)
 	if err != nil {
