@@ -98,12 +98,13 @@ func main() {
 	}
 
 	//Make a map and maps command names to commands.
-	//registers the commands "login" and "register"
+	//registers the commands "login", "register", "reset"
 	myCommands := commands{
 		cmdMap: make(map[string]func(*state, command) error),
 	}
 	myCommands.registerCommand("login", handlerLogin)
 	myCommands.registerCommand("register", handlerRegister)
+	myCommands.registerCommand("reset", handlerReset)
 
 	//makes a command struct and assigns it the arguments as well as
 	// the command name

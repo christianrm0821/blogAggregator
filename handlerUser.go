@@ -77,3 +77,15 @@ func handlerRegister(s *state, cmd command) error {
 
 	return nil
 }
+
+// Deletes all of the rows(users) in the Users table
+func handlerReset(s *state, cmd command) error {
+	ctx := context.Background()
+	err := s.db.ResetUsers(ctx)
+	if err != nil {
+		fmt.Println("could not reset the users table")
+		os.Exit(1)
+		return err
+	}
+	return nil
+}
