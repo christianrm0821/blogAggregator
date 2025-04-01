@@ -89,3 +89,20 @@ func handlerReset(s *state, cmd command) error {
 	}
 	return nil
 }
+
+func handlerUserList(s *state, cmd command) error {
+	ctx := context.Background()
+	names, err := s.db.ListUsers(ctx)
+	if err != nil {
+		os.Exit(1)
+		return err
+	}
+	currUser := *(s.config.CurrentUserName)
+	for _, val := range names {
+		if val == currUser {
+			val = val + " (current)"
+		}
+		fmt.Printf("* %v\n", val)
+	}
+	return nil
+}

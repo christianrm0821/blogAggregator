@@ -98,13 +98,14 @@ func main() {
 	}
 
 	//Make a map and maps command names to commands.
-	//registers the commands "login", "register", "reset"
+	//registers the commands "login", "register", "reset", "users"
 	myCommands := commands{
 		cmdMap: make(map[string]func(*state, command) error),
 	}
 	myCommands.registerCommand("login", handlerLogin)
 	myCommands.registerCommand("register", handlerRegister)
 	myCommands.registerCommand("reset", handlerReset)
+	myCommands.registerCommand("users", handlerUserList)
 
 	//makes a command struct and assigns it the arguments as well as
 	// the command name
@@ -123,7 +124,9 @@ func main() {
 
 	//Prints out the current state of the ans config to check if the
 	//user is correct after the command has been ran.
-	ans, _ = config.Read()
-	fmt.Printf("DBurl: %v\n", *((*ans).DbURL))
-	fmt.Printf("username: %v\n", *((*ans).CurrentUserName))
+	//ans, _ = config.Read()
+	/*
+		fmt.Printf("DBurl: %v\n", *((*ans).DbURL))
+		fmt.Printf("username: %v\n", *((*ans).CurrentUserName))
+	*/
 }
