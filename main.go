@@ -106,6 +106,7 @@ func main() {
 	myCommands.registerCommand("register", handlerRegister)
 	myCommands.registerCommand("reset", handlerReset)
 	myCommands.registerCommand("users", handlerUserList)
+	myCommands.registerCommand("agg", handlerAgg)
 
 	//makes a command struct and assigns it the arguments as well as
 	// the command name

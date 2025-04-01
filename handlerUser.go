@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"html"
 	"os"
 	"time"
 
@@ -104,5 +105,21 @@ func handlerUserList(s *state, cmd command) error {
 		}
 		fmt.Printf("* %v\n", val)
 	}
+	return nil
+}
+
+func handlerAgg(s *state, cmd command) error {
+	rssFeed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		os.Exit(1)
+		return err
+	}
+	rssFeed.Channel.Description = html.UnescapeString(rssFeed.Channel.Description)
+	rssFeed.Channel.Title = html.UnescapeString(rssFeed.Channel.Title)
+	for _, val := range rssFeed.Channel.Item {
+		val.Title = html.UnescapeString(val.Title)
+		val.Description = html.UnescapeString(val.Description)
+	}
+	fmt.Printf("%+v\n", rssFeed)
 	return nil
 }
