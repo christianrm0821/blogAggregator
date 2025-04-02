@@ -9,6 +9,15 @@ import (
 	"context"
 )
 
+const resetFeed = `-- name: ResetFeed :exec
+delete from feeds
+`
+
+func (q *Queries) ResetFeed(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, resetFeed)
+	return err
+}
+
 const resetUsers = `-- name: ResetUsers :exec
 delete from users
 `

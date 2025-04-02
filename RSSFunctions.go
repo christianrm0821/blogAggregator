@@ -50,15 +50,5 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 		os.Exit(1)
 		return nil, err
 	}
-
-	/*
-		rssFeed.Channel.Description = html.UnescapeString(rssFeed.Channel.Description)
-		rssFeed.Channel.Title = html.UnescapeString(rssFeed.Channel.Title)
-		for _, val := range rssFeed.Channel.Item {
-			val.Title = html.UnescapeString(val.Title)
-			val.Description = html.UnescapeString(val.Description)
-		}
-	*/
-
 	return &rssFeed, nil
 }

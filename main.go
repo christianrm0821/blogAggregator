@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"strings"
 	"workspace/github.com/christianrm0821/blogAggregator/internal/config"
 	"workspace/github.com/christianrm0821/blogAggregator/internal/database"
 
@@ -60,9 +59,11 @@ func main() {
 	}
 
 	//makes all the words typed in lower-case
-	for i := range myArgs {
-		myArgs[i] = strings.ToLower(myArgs[i])
-	}
+	/*
+		for i := range myArgs {
+			myArgs[i] = strings.ToLower(myArgs[i])
+		}
+	*/
 
 	//gets the first second element in args which is the command name
 	actualCommand := myArgs[1]
@@ -76,6 +77,12 @@ func main() {
 	//checks if it is register and if it is then checks if it has a username
 	if actualCommand == "register" && len(myArgs) < 3 {
 		fmt.Println("need a user to add ")
+		return
+	}
+
+	if actualCommand == "addfeed" && len(myArgs) < 4 {
+		fmt.Println("need to add a descriptive name for feed and the url of the feed")
+		os.Exit(1)
 		return
 	}
 
@@ -98,7 +105,7 @@ func main() {
 	}
 
 	//Make a map and maps command names to commands.
-	//registers the commands "login", "register", "reset", "users"
+	//registers the commands "login", "register", "reset", "users", "addfeed"
 	myCommands := commands{
 		cmdMap: make(map[string]func(*state, command) error),
 	}
@@ -107,6 +114,8 @@ func main() {
 	myCommands.registerCommand("reset", handlerReset)
 	myCommands.registerCommand("users", handlerUserList)
 	myCommands.registerCommand("agg", handlerAgg)
+	myCommands.registerCommand("addfeed", handlerAddFeed)
+	myCommands.registerCommand("feeds", handlerListFeeds)
 
 	//makes a command struct and assigns it the arguments as well as
 	// the command name

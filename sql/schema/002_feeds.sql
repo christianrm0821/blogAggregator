@@ -5,7 +5,7 @@ create table feeds(
     updated_at timestamp not null,
     name text not null,
     url text unique not null,
-    user_id UUID,
+    user_id UUID not null,
     constraint fk_users
     foreign key (user_id)
     references users(id) on delete cascade

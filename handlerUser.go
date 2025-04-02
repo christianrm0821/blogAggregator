@@ -88,16 +88,28 @@ func handlerReset(s *state, cmd command) error {
 		os.Exit(1)
 		return err
 	}
+	ctx = context.Background()
+	err = s.db.ResetFeed(ctx)
+	if err != nil {
+		fmt.Println("could not reset the feeds table")
+		os.Exit(1)
+		return err
+	}
 	return nil
 }
 
+// prints all the users that are registered and states which is the current user
 func handlerUserList(s *state, cmd command) error {
 	ctx := context.Background()
+
+	//gets a list of all the names
 	names, err := s.db.ListUsers(ctx)
 	if err != nil {
 		os.Exit(1)
 		return err
 	}
+
+	//prints all the names and adds (current) to the current user
 	currUser := *(s.config.CurrentUserName)
 	for _, val := range names {
 		if val == currUser {
@@ -108,18 +120,78 @@ func handlerUserList(s *state, cmd command) error {
 	return nil
 }
 
+// gets the feed from the website given the website
 func handlerAgg(s *state, cmd command) error {
+	//gets the feed from the website/ handles error
 	rssFeed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
 	if err != nil {
 		os.Exit(1)
 		return err
 	}
+
+	//Handles any special html characters in the string
 	rssFeed.Channel.Description = html.UnescapeString(rssFeed.Channel.Description)
 	rssFeed.Channel.Title = html.UnescapeString(rssFeed.Channel.Title)
 	for _, val := range rssFeed.Channel.Item {
 		val.Title = html.UnescapeString(val.Title)
 		val.Description = html.UnescapeString(val.Description)
 	}
+
+	//prints the rssFeed stuct
 	fmt.Printf("%+v\n", rssFeed)
+	return nil
+}
+
+// Adds to thee feed table
+func handlerAddFeed(s *state, cmd command) error {
+	//gets the current user so we can later use his ID/ handles any errors
+	user, err := s.db.GetUser(context.Background(), *s.config.CurrentUserName)
+	if err != nil {
+		fmt.Println("error getting user in addfeed")
+		os.Exit(1)
+		return err
+	}
+
+	//Makes a feed struct so we can add it into our feeds table
+	feedstr := database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      cmd.args[0],
+		Url:       cmd.args[1],
+		UserID:    user.ID,
+	}
+	feed, err := s.db.CreateFeed(context.Background(), feedstr)
+	if err != nil {
+		fmt.Println("error with creating a new feed. Duplicate")
+		os.Exit(1)
+		return err
+	}
+
+	fmt.Printf("ID: %v\n", feed.ID)
+	fmt.Printf("Created at: %v\n", feed.CreatedAt)
+	fmt.Printf("Updated at: %v\n", feed.UpdatedAt)
+	fmt.Printf("Name: %v\n", feed.Name)
+	fmt.Printf("URL: %v\n", feed.Url)
+	fmt.Printf("UserID: %v\n", feed.UserID)
+	return nil
+}
+
+// Prints out the feed name, url, and user that created the feed
+func handlerListFeeds(s *state, cmd command) error {
+	ctx := context.Background()
+
+	//gets all of the data from the sql query and handles if there is an issue
+	feed, err := s.db.ListFeeds(ctx)
+	if err != nil {
+		fmt.Println("error with getting the list of names/url/username")
+		os.Exit(1)
+		return err
+	}
+
+	//prints out all of the feed data (name/url/username)
+	for _, val := range feed {
+		fmt.Printf("%s (%s) by %s\n", val.Name, val.Url, val.Name_2)
+	}
 	return nil
 }
