@@ -149,6 +149,9 @@ func main() {
 	//Prints the names of all the feeds that are being followed by the current user
 	myCommands.registerCommand("following", middlewareLoggedIn(handlerFollowing))
 
+	//unfollows feed from current user(1 argument(url of feed to be unfollowed))
+	myCommands.registerCommand("unfollow", middlewareLoggedIn(handlerUnfollow))
+
 	//makes a command struct and assigns it the arguments as well as
 	// the command name
 	cmd := command{
