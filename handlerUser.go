@@ -15,6 +15,8 @@ import (
 // Login function which is added to the commands map
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.args) == 0 {
+		fmt.Println("login expects to have a username")
+		os.Exit(1)
 		return fmt.Errorf("login expects to have a username")
 	}
 
@@ -39,8 +41,11 @@ func handlerLogin(s *state, cmd command) error {
 
 // Register function which is added to the commands map
 func handlerRegister(s *state, cmd command) error {
+	err := fmt.Errorf("")
 	if len(cmd.args) == 0 {
 		fmt.Print("register expects a username after command")
+		os.Exit(1)
+		return fmt.Errorf("add a username to command")
 	}
 
 	//Get the username, create an empty context, create new uuid
@@ -193,5 +198,54 @@ func handlerListFeeds(s *state, cmd command) error {
 	for _, val := range feed {
 		fmt.Printf("%s (%s) by %s\n", val.Name, val.Url, val.Name_2)
 	}
+	return nil
+}
+
+// follow command
+func handlerFollow(s *state, cmd command) error {
+	//make sure that an argument was added to the command call
+	if len(cmd.args) == 0 {
+		fmt.Println("need to include a URL to follow")
+		os.Exit(1)
+		return fmt.Errorf("need to include URL of feed")
+	}
+	//gets the url into feedurl
+	fmt.Printf("%v\n", cmd.args[0])
+	feedurl := cmd.args[0]
+
+	//get the feed by using url
+	feed, err := s.db.GetFeedByUrl(context.Background(), feedurl)
+	if err != nil {
+		fmt.Println("error getting feed using the url")
+		os.Exit(1)
+		return err
+	}
+
+	currUser, err := s.db.GetUser(context.Background(), *s.config.CurrentUserName)
+	if err != nil {
+		fmt.Println("could not get current username")
+		os.Exit(1)
+		return err
+	}
+
+	feedFollows := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: feed.CreatedAt,
+		UpdatedAt: feed.UpdatedAt,
+		UserID:    currUser.ID,
+		FeedID:    feed.ID,
+	}
+
+	createFFR, err := s.db.CreateFeedFollow(context.Background(), feedFollows)
+	if err != nil {
+		//fmt.Println("error creating the feed follows row")
+		fmt.Printf("error: %v ", err)
+		os.Exit(1)
+		return err
+	}
+
+	fmt.Printf("Feed Name: %v\n", createFFR.FeedName)
+	fmt.Printf("Current user: %v\n", createFFR.UserName)
+
 	return nil
 }

@@ -130,6 +130,9 @@ func main() {
 	//prints out the feed names, url and who added it(0 arguments)
 	myCommands.registerCommand("feeds", handlerListFeeds)
 
+	//Follows the feed of the url provided(1 argument, url of feeed to follow)
+	myCommands.registerCommand("follow", handlerFollow)
+
 	//makes a command struct and assigns it the arguments as well as
 	// the command name
 	cmd := command{

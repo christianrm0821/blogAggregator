@@ -1,6 +1,6 @@
 -- +goose Up
 create table feed_follows(
-    id primary key,
+    id UUID PRIMARY KEY,
     created_at timestamp not null,
     updated_at timestamp not null,
     user_id UUID not null,

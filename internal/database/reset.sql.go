@@ -18,6 +18,15 @@ func (q *Queries) ResetFeed(ctx context.Context) error {
 	return err
 }
 
+const resetFeedFollows = `-- name: ResetFeedFollows :exec
+delete from feed_follows
+`
+
+func (q *Queries) ResetFeedFollows(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, resetFeedFollows)
+	return err
+}
+
 const resetUsers = `-- name: ResetUsers :exec
 delete from users
 `
