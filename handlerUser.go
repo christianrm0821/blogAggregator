@@ -142,7 +142,7 @@ func handlerAgg(s *state, cmd command) error {
 	return nil
 }
 
-// Adds to thee feed table
+// Adds to the feed table
 func handlerAddFeed(s *state, cmd command) error {
 	//gets the current user so we can later use his ID/ handles any errors
 	user, err := s.db.GetUser(context.Background(), *s.config.CurrentUserName)

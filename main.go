@@ -109,12 +109,25 @@ func main() {
 	myCommands := commands{
 		cmdMap: make(map[string]func(*state, command) error),
 	}
+	//checks if the username you put in is registered, if not gives an error(takes 1 argument(username to login to))
 	myCommands.registerCommand("login", handlerLogin)
+
+	//registers a new user and gives an error if user already registered(takes 1 argument(username to register)) Also prints out new users information
 	myCommands.registerCommand("register", handlerRegister)
+
+	//Resets the users, removes the users from the table(0 arguments)
 	myCommands.registerCommand("reset", handlerReset)
+
+	//lists all of the users that are currently registered(0 arguments)
 	myCommands.registerCommand("users", handlerUserList)
+
+	//gets all of the information from a website and prints it to terminal(0 arguments)
 	myCommands.registerCommand("agg", handlerAgg)
+
+	//gets feed and adds it to feeds table (2 arguments, 1. the feed title 2. the feed url) gives an error if it is a duplicate
 	myCommands.registerCommand("addfeed", handlerAddFeed)
+
+	//prints out the feed names, url and who added it(0 arguments)
 	myCommands.registerCommand("feeds", handlerListFeeds)
 
 	//makes a command struct and assigns it the arguments as well as
