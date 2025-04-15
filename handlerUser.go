@@ -41,7 +41,7 @@ func handlerLogin(s *state, cmd command) error {
 
 // Register function which is added to the commands map
 func handlerRegister(s *state, cmd command) error {
-	err := fmt.Errorf("")
+	//err := fmt.Errorf("")
 	if len(cmd.args) == 0 {
 		fmt.Print("register expects a username after command")
 		os.Exit(1)
@@ -148,7 +148,7 @@ func handlerAgg(s *state, cmd command) error {
 }
 
 // Adds to the feed table
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	//gets the current user so we can later use his ID/ handles any errors
 	user, err := s.db.GetUser(context.Background(), *s.config.CurrentUserName)
 	if err != nil {
@@ -169,6 +169,21 @@ func handlerAddFeed(s *state, cmd command) error {
 	feed, err := s.db.CreateFeed(context.Background(), feedstr)
 	if err != nil {
 		fmt.Println("error with creating a new feed. Duplicate")
+		os.Exit(1)
+		return err
+	}
+
+	feedFollow := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    user.ID,
+		FeedID:    feed.ID,
+	}
+
+	_, err = s.db.CreateFeedFollow(context.Background(), feedFollow)
+	if err != nil {
+		fmt.Println("error creating feed follow in handlerAddFeed")
 		os.Exit(1)
 		return err
 	}
@@ -201,8 +216,8 @@ func handlerListFeeds(s *state, cmd command) error {
 	return nil
 }
 
-// follow command
-func handlerFollow(s *state, cmd command) error {
+// follow command takes a url and makes a new follow record for the current user(1 argument: url of feed to follow)
+func handlerFollow(s *state, cmd command, user database.User) error {
 	//make sure that an argument was added to the command call
 	if len(cmd.args) == 0 {
 		fmt.Println("need to include a URL to follow")
@@ -248,4 +263,26 @@ func handlerFollow(s *state, cmd command) error {
 	fmt.Printf("Current user: %v\n", createFFR.UserName)
 
 	return nil
+}
+
+func handlerFollowing(s *state, cmd command, user database.User) error {
+	user, err := s.db.GetUser(context.Background(), *s.config.CurrentUserName)
+	if err != nil {
+		fmt.Println("error getting the user")
+		os.Exit(1)
+		return err
+	}
+
+	feedsFollowed, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
+	if err != nil {
+		fmt.Println("error getting the followed feed from current user")
+		os.Exit(1)
+		return err
+	}
+	for i, val := range feedsFollowed {
+		fmt.Printf("%v. %v\n", i+1, val.FeedName)
+		i++
+	}
+	return nil
+
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"os"
@@ -24,6 +25,18 @@ type commands struct {
 // Registers a new command into the map which maps command names to commands
 func (c *commands) registerCommand(name string, f func(*state, command) error) {
 	(*c).cmdMap[name] = f
+}
+
+// used to reduce code from commands that need to get a user(addfeed/following/follow)
+func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) error) func(*state, command) error {
+	return func(s *state, cmd command) error {
+		user, err := s.db.GetUser(context.Background(), *s.config.CurrentUserName)
+		if err != nil {
+			return err
+		}
+		return handler(s, cmd, user)
+	}
+
 }
 
 // Runs the command that is passed by going through the map
@@ -125,13 +138,16 @@ func main() {
 	myCommands.registerCommand("agg", handlerAgg)
 
 	//gets feed and adds it to feeds table (2 arguments, 1. the feed title 2. the feed url) gives an error if it is a duplicate
-	myCommands.registerCommand("addfeed", handlerAddFeed)
+	myCommands.registerCommand("addfeed", middlewareLoggedIn(handlerAddFeed))
 
 	//prints out the feed names, url and who added it(0 arguments)
 	myCommands.registerCommand("feeds", handlerListFeeds)
 
 	//Follows the feed of the url provided(1 argument, url of feeed to follow)
-	myCommands.registerCommand("follow", handlerFollow)
+	myCommands.registerCommand("follow", middlewareLoggedIn(handlerFollow))
+
+	//Prints the names of all the feeds that are being followed by the current user
+	myCommands.registerCommand("following", middlewareLoggedIn(handlerFollowing))
 
 	//makes a command struct and assigns it the arguments as well as
 	// the command name
