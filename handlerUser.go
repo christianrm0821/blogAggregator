@@ -159,7 +159,7 @@ func scrapeFeeds(s *state, user database.User) error {
 
 	for _, val := range rssFeed.Channel.Item {
 		val.Title = html.UnescapeString(val.Title)
-		fmt.Printf("%v\n", val.Title)
+		fmt.Printf("1. %v\n", val.Title)
 	}
 	return nil
 
