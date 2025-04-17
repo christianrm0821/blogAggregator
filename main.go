@@ -71,13 +71,6 @@ func main() {
 		fmt.Println("you need more arguments")
 	}
 
-	//makes all the words typed in lower-case
-	/*
-		for i := range myArgs {
-			myArgs[i] = strings.ToLower(myArgs[i])
-		}
-	*/
-
 	//gets the first second element in args which is the command name
 	actualCommand := myArgs[1]
 
