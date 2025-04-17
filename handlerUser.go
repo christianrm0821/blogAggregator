@@ -125,26 +125,67 @@ func handlerUserList(s *state, cmd command) error {
 	return nil
 }
 
-// gets the feed from the website given the website
-func handlerAgg(s *state, cmd command) error {
-	//gets the feed from the website/ handles error
-	rssFeed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+//Fetches the actual feed
+/*
+	complete_feed, err := s.db.GetFeedByUrl(context.Background(), feed.Url)
 	if err != nil {
+		fmt.Println("error getting the actual feed using the URL")
 		os.Exit(1)
 		return err
 	}
+*/
 
-	//Handles any special html characters in the string
-	rssFeed.Channel.Description = html.UnescapeString(rssFeed.Channel.Description)
-	rssFeed.Channel.Title = html.UnescapeString(rssFeed.Channel.Title)
-	for _, val := range rssFeed.Channel.Item {
-		val.Title = html.UnescapeString(val.Title)
-		val.Description = html.UnescapeString(val.Description)
+// Get all the feeds that need to be fetched and print their titles to the console
+func scrapeFeeds(s *state, user database.User) error {
+	//gets next feed to fetch(not the whole feed just the ID)
+	feed, err := s.db.GetNextFeedToFetch(context.Background(), user.ID)
+	if err != nil {
+		fmt.Println("error getting feed of current user")
+		return err
 	}
 
-	//prints the rssFeed stuct
-	fmt.Printf("%+v\n", rssFeed)
+	//Marks the feed that was fetched at current time
+	err = s.db.MarkFeedFetched(context.Background(), feed.ID)
+	if err != nil {
+		fmt.Println("error marking feed as fetched")
+		return err
+	}
+
+	rssFeed, err := fetchFeed(context.Background(), feed.Url)
+	if err != nil {
+		return err
+	}
+	rssFeed.Channel.Title = html.UnescapeString(rssFeed.Channel.Title)
+
+	for _, val := range rssFeed.Channel.Item {
+		val.Title = html.UnescapeString(val.Title)
+		fmt.Printf("%v\n", val.Title)
+	}
 	return nil
+
+}
+
+// gets the feed from the next website(1 argument(time (1s,1m,1h)))
+func handlerAgg(s *state, cmd command, user database.User) error {
+	//checks if argument was input
+	if len(cmd.args) < 1 {
+		fmt.Println("need to input a time between request(1s,1m,1h)")
+		return fmt.Errorf("need to input a time between request(1s,1m,1h)")
+	}
+
+	//make a duration type from the argument entered with command handles if input is not valid
+	time_between_reqs, err := time.ParseDuration(cmd.args[0])
+	if err != nil {
+		fmt.Println("need to enter a valid time")
+		return fmt.Errorf("need to enter a valid time")
+	}
+	fmt.Printf("Collecting feed every %v\n", time_between_reqs)
+
+	//creates a new ticker type with the time given
+	ticker := time.NewTicker(time_between_reqs)
+	for ; ; <-ticker.C {
+		scrapeFeeds(s, user)
+	}
 }
 
 // Adds to the feed table
@@ -168,7 +209,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	}
 	feed, err := s.db.CreateFeed(context.Background(), feedstr)
 	if err != nil {
-		fmt.Println("error with creating a new feed. Duplicate")
+		fmt.Printf("error with creating a new feed. %v\n", err)
 		os.Exit(1)
 		return err
 	}

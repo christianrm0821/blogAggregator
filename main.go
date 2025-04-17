@@ -127,8 +127,8 @@ func main() {
 	//lists all of the users that are currently registered(0 arguments)
 	myCommands.registerCommand("users", handlerUserList)
 
-	//gets all of the information from a website and prints it to terminal(0 arguments)
-	myCommands.registerCommand("agg", handlerAgg)
+	//gets all of the information from a website and prints it to terminal(1 arguments(time (1m, 1s,1h)))
+	myCommands.registerCommand("agg", middlewareLoggedIn(handlerAgg))
 
 	//gets feed and adds it to feeds table (2 arguments, 1. the feed title 2. the feed url) gives an error if it is a duplicate
 	myCommands.registerCommand("addfeed", middlewareLoggedIn(handlerAddFeed))
