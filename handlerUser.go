@@ -149,10 +149,11 @@ func time_parse(time_input string) time.Time {
 
 // Get all the feeds that need to be fetched and print their titles to the console
 func scrapeFeeds(s *state, user database.User) error {
-	//gets next feed to fetch(not the whole feed just the ID)
+	//gets next feedID to fetch(not the whole feed just the ID)
 	feed, err := s.db.GetNextFeedToFetch(context.Background(), user.ID)
 	if err != nil {
 		fmt.Println("error getting feed of current user")
+		fmt.Printf("Error: %v\n", err)
 		return err
 	}
 
@@ -163,7 +164,14 @@ func scrapeFeeds(s *state, user database.User) error {
 		return err
 	}
 
-	rssFeed, err := fetchFeed(context.Background(), feed.Url)
+	feedurl, err := s.db.GetFeedURLFromFeedID(context.Background(), feed.FeedID)
+	if err != nil {
+		fmt.Println("error getting the feed url from ID")
+		fmt.Printf("Error: %v\n", err)
+	}
+
+	//fetches the feed and places it in rssFeed
+	rssFeed, err := fetchFeed(context.Background(), feedurl)
 	if err != nil {
 		return err
 	}
@@ -179,11 +187,12 @@ func scrapeFeeds(s *state, user database.User) error {
 			Url:         html.UnescapeString(val.Link),
 			Description: html.UnescapeString(val.Description),
 			PublishedAt: time_parse(val.PubDate),
-			FeedID:      feed.ID,
+			FeedID:      feed.FeedID,
 		}
 		_, err := s.db.CreatPost(context.Background(), post)
 		if err != nil {
-			fmt.Printf("%v\n", err)
+			fmt.Println("error creating the post")
+			fmt.Printf("Error: %v\n", err)
 			return err
 		}
 	}
@@ -201,7 +210,7 @@ func handlerAgg(s *state, cmd command, user database.User) error {
 	//make a duration type from the argument entered with command handles if input is not valid
 	time_between_reqs, err := time.ParseDuration(cmd.args[0])
 	if err != nil {
-		fmt.Println("need to enter a valid time")
+		fmt.Printf("Error: %v", err)
 		return fmt.Errorf("need to enter a valid time")
 	}
 	fmt.Printf("Collecting feed every %v\n", time_between_reqs)
@@ -298,6 +307,7 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedurl)
 	if err != nil {
 		fmt.Println("error getting feed using the url")
+		fmt.Printf("Error: %v", err)
 		os.Exit(1)
 		return err
 	}
@@ -401,15 +411,20 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 		return err
 	}
 	for i := 0; i < num_posts; i++ {
+		feed_name, err := s.db.GetFeedNameFromID(context.Background(), posts[i].FeedID)
+		if err != nil {
+			fmt.Println("could not get the feed name")
+		}
+		fmt.Printf("Feed Name: %v\n", feed_name)
+		fmt.Println()
 		fmt.Printf("Title: %v", posts[i].Title)
 		fmt.Println()
 		fmt.Printf("Published: %v", posts[i].PublishedAt)
 		fmt.Println()
 		fmt.Printf("URL: %v", posts[i].Url)
 		fmt.Println()
-		fmt.Println("Description:")
+		fmt.Println("-------------------------------------------------")
 		fmt.Println()
-		fmt.Printf("%v", posts[i].Description)
 	}
 	return nil
 

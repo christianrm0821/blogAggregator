@@ -12,23 +12,21 @@ import (
 )
 
 const getNextFeedToFetch = `-- name: GetNextFeedToFetch :one
-select id, created_at, updated_at, name, url, user_id, last_fetched_at from feeds
+select id, created_at, updated_at, user_id, feed_id from feed_follows
 where user_id = $1
-order by last_fetched_at nulls first
+order by updated_at nulls first
 limit 1
 `
 
-func (q *Queries) GetNextFeedToFetch(ctx context.Context, userID uuid.UUID) (Feed, error) {
+func (q *Queries) GetNextFeedToFetch(ctx context.Context, userID uuid.UUID) (FeedFollow, error) {
 	row := q.db.QueryRowContext(ctx, getNextFeedToFetch, userID)
-	var i Feed
+	var i FeedFollow
 	err := row.Scan(
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Name,
-		&i.Url,
 		&i.UserID,
-		&i.LastFetchedAt,
+		&i.FeedID,
 	)
 	return i, err
 }

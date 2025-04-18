@@ -17,22 +17,28 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	//make the request and handle any errors
 	req, err := http.NewRequestWithContext(ctx, "GET", feedURL, nil)
 	if err != nil {
-		fmt.Print("error getting request\n")
+		fmt.Println("error getting request")
+		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 		return nil, err
 	}
+	//set "User-Agent" header to gator
+	//This is to identify the program to the server
+	req.Header.Set("User-Agent", "gator")
 
 	//get a response and handle any errors
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Print("error getting response\n")
+		fmt.Println("error getting response")
+		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 		return nil, err
 	}
+	defer res.Body.Close()
 
 	//set "User-Agent" header to gator
 	//This is to identify the program to the server
-	res.Header.Set("User-Agent", "gator")
+	//res.Header.Set("User-Agent", "gator")
 
 	//retrieves the data in the form of byte
 	data, err := io.ReadAll(res.Body)
@@ -47,6 +53,7 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	err = xml.Unmarshal(data, &rssFeed)
 	if err != nil {
 		fmt.Println("error unmarshalling data")
+		fmt.Printf("Error: %v", err)
 		os.Exit(1)
 		return nil, err
 	}

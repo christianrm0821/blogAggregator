@@ -1,5 +1,5 @@
 -- name: GetNextFeedToFetch :one
-select * from feeds
+select * from feed_follows
 where user_id = $1
-order by last_fetched_at nulls first
+order by updated_at nulls first
 limit 1;

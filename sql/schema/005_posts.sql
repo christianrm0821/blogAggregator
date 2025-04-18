@@ -5,7 +5,7 @@ create table posts(
     updated_at timestamp not null,
     title text not null,
     url text unique not null,
-    description text,
+    description text not null,
     published_at timestamp not null,
     feed_id UUID not null,
     constraint fk_feed_id foreign key (feed_id) references feeds(id) on delete cascade
