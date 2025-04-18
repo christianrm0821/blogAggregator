@@ -36,10 +36,6 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	}
 	defer res.Body.Close()
 
-	//set "User-Agent" header to gator
-	//This is to identify the program to the server
-	//res.Header.Set("User-Agent", "gator")
-
 	//retrieves the data in the form of byte
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
