@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html"
 	"os"
+	"strconv"
 	"time"
 
 	"workspace/github.com/christianrm0821/blogAggregator/internal/database"
@@ -80,7 +81,6 @@ func handlerRegister(s *state, cmd command) error {
 	fmt.Printf("user Created At: %v\n", user.CreatedAt)
 	fmt.Printf("user updated at: %v\n", user.UpdatedAt)
 	fmt.Printf("user name: %v\n", user.Name)
-
 	return nil
 }
 
@@ -125,15 +125,27 @@ func handlerUserList(s *state, cmd command) error {
 	return nil
 }
 
-//Fetches the actual feed
-/*
-	complete_feed, err := s.db.GetFeedByUrl(context.Background(), feed.Url)
-	if err != nil {
-		fmt.Println("error getting the actual feed using the URL")
-		os.Exit(1)
-		return err
+// allows us to interpret the time
+func time_parse(time_input string) time.Time {
+	var layouts []string
+	layouts = append(layouts, "2006-01-02 15:04:05")
+	layouts = append(layouts, "02 Jan 06 15:04 MST")
+	layouts = append(layouts, "2006-01-02T15:04:05Z")
+	layouts = append(layouts, "2006-01-02 15:04:05 MST")
+	layouts = append(layouts, time.RFC1123)
+	layouts = append(layouts, time.RFC822)
+	layouts = append(layouts, "02 Jan 2006 15:04:05 -0700")
+	var parsed_time time.Time
+	var err error
+
+	for _, val := range layouts {
+		parsed_time, err = time.Parse(val, time_input)
+		if err == nil {
+			return parsed_time
+		}
 	}
-*/
+	return time.Time{}
+}
 
 // Get all the feeds that need to be fetched and print their titles to the console
 func scrapeFeeds(s *state, user database.User) error {
@@ -157,12 +169,25 @@ func scrapeFeeds(s *state, user database.User) error {
 	}
 	rssFeed.Channel.Title = html.UnescapeString(rssFeed.Channel.Title)
 
+	//Adds the all the posts in the rssfeed into the post table
 	for _, val := range rssFeed.Channel.Item {
-		val.Title = html.UnescapeString(val.Title)
-		fmt.Printf("1. %v\n", val.Title)
+		post := database.CreatPostParams{
+			ID:          uuid.New(),
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+			Title:       html.UnescapeString(val.Title),
+			Url:         html.UnescapeString(val.Link),
+			Description: html.UnescapeString(val.Description),
+			PublishedAt: time_parse(val.PubDate),
+			FeedID:      feed.ID,
+		}
+		_, err := s.db.CreatPost(context.Background(), post)
+		if err != nil {
+			fmt.Printf("%v\n", err)
+			return err
+		}
 	}
 	return nil
-
 }
 
 // gets the feed from the next website(1 argument(time (1s,1m,1h)))
@@ -351,4 +376,41 @@ func handlerUnfollow(s *state, cmd command, user database.User) error {
 		return err
 	}
 	return nil
+}
+
+// Allows users to browse through their posts(takes in 1 optional argument(number of posts to show))
+func handlerBrowse(s *state, cmd command, user database.User) error {
+	num_posts := 2
+	var err error
+	if len(cmd.args) > 0 {
+		num_posts, err = strconv.Atoi(cmd.args[0])
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			num_posts = 2
+		}
+	}
+	if num_posts > 10 {
+		num_posts = 10
+		fmt.Println("The limit it 10")
+	}
+
+	posts, err := s.db.GetPostForUser(context.Background(), user.ID)
+	if err != nil {
+		fmt.Println("make sure to run agg command before running browse")
+		fmt.Printf("Error: %v\n", err)
+		return err
+	}
+	for i := 0; i < num_posts; i++ {
+		fmt.Printf("Title: %v", posts[i].Title)
+		fmt.Println()
+		fmt.Printf("Published: %v", posts[i].PublishedAt)
+		fmt.Println()
+		fmt.Printf("URL: %v", posts[i].Url)
+		fmt.Println()
+		fmt.Println("Description:")
+		fmt.Println()
+		fmt.Printf("%v", posts[i].Description)
+	}
+	return nil
+
 }

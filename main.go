@@ -127,7 +127,7 @@ func main() {
 	//lists all of the users that are currently registered(0 arguments)
 	myCommands.registerCommand("users", handlerUserList)
 
-	//gets all of the information from a website and prints it to terminal(1 arguments(time (1m, 1s,1h)))
+	//gets all of the information from a website and adds it to the post table(1 arguments(time (1m, 1s,1h)))
 	myCommands.registerCommand("agg", middlewareLoggedIn(handlerAgg))
 
 	//gets feed and adds it to feeds table (2 arguments, 1. the feed title 2. the feed url) gives an error if it is a duplicate
@@ -144,6 +144,9 @@ func main() {
 
 	//unfollows feed from current user(1 argument(url of feed to be unfollowed))
 	myCommands.registerCommand("unfollow", middlewareLoggedIn(handlerUnfollow))
+
+	//browse the posts which the current user is following(1 OPTIONAL argument of how many posts to show)
+	myCommands.registerCommand("browse", middlewareLoggedIn(handlerBrowse))
 
 	//makes a command struct and assigns it the arguments as well as
 	// the command name
