@@ -63,6 +63,10 @@ There are a few other commands you'll need as well:
 10. agg <duration> | Aggregates new posts from feeds (e.g. 1m, 1h)
 11. browse [limit] | Displays posts from followed feeds(limit is 10 at a time)
 
+![image](https://github.com/user-attachments/assets/cd8b69d9-70c5-419a-90d9-bf0882f6b0e4)
+![image](https://github.com/user-attachments/assets/da07ef08-dc04-43ec-bffe-b30afcd2304b)
+
+
 
 ## Limitations 
 Gator expects valid RSS/XML feeds. Some feeds may be malformed or use non-standard formats and may not work properly.
