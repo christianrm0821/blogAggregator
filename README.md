@@ -1,7 +1,7 @@
 # blogAggregator
 
 
-A multi-player command line tool for aggregating RSS feeds and viewing the posts.
+A multi-user command line tool for aggregating RSS feeds and viewing the posts.
 
 ## Installation
 
